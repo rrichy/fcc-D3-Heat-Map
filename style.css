@@ -1,0 +1,4 @@
+.cell:hover {
+    stroke: black;
+    stroke-width: 1;
+}

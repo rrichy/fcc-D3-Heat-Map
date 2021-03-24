@@ -1,0 +1,25 @@
+{
+  "name": "d3-heat-map",
+  "version": "1.0.0",
+  "description": "fcc 3rd data visualization project",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rrichy/fcc-D3-Heat-Map.git"
+  },
+  "keywords": [
+    "d3",
+    "heat",
+    "map",
+    "fcc"
+  ],
+  "author": "rrichy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rrichy/fcc-D3-Heat-Map/issues"
+  },
+  "homepage": "https://github.com/rrichy/fcc-D3-Heat-Map#readme"
+}
