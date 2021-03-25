@@ -25,3 +25,7 @@ path.domain {
     color: white;
     border-radius: .5rem;
 }
+
+.tick {
+    font-size: 14px;
+}

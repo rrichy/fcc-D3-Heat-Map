@@ -136,13 +136,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     return BLYLWRD[Math.floor((d.variance + Math.abs(extent[0])) / threshold)] || BLYLWRD[10];
                 })
                 .on('mouseover', (e, d) => {
-                    const x = e.target.getAttribute('x') - document.getElementById('tooltip').offsetWidth/2 + CELL_W;
-                    const y = e.target.getAttribute('y') - document.getElementById('tooltip').offsetHeight;
+                    const y = yScale(d.month - 1) - 85;
                     tooltip.style('opacity', .8)
-                        .html(d.year + ' - ' + d3.timeFormat('%B')(new Date(2000, d.month - 1)) + '<br>' + Math.round((d.variance + baseTemperature) * 1000)/1000 + ' ℃<br>' + d.variance + ' ℃')
-                        .style('top', y + 'px')
-                        .style('left', x + 'px')
-                        .attr('data-year', d.year);
+                    .html(d.year + ' - ' + d3.timeFormat('%B')(new Date(2000, d.month - 1)) + '<br>' + Math.round((d.variance + baseTemperature) * 1000)/1000 + ' ℃<br>' + d.variance + ' ℃')
+                    .style('top', y + 'px')
+                    .attr('data-year', d.year);
+                    
+                    const x = e.pageX + CELL_W/2 - document.getElementById('tooltip').offsetWidth/2;
+                    tooltip.style('left', x + 'px')
+                        // console.log(d3.select('#tooltip'))
                 })
                 .on('mouseout', () => {
                     tooltip.html('')
