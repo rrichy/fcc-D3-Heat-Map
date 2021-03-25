@@ -1,5 +1,5 @@
 const [CELL_W, CELL_H] = [5, 32];
-const PADDING = { left: 150, top: 120, right: 50, bottom: 50 };
+const PADDING = { left: 150, top: 120, right: 50, bottom: 100, legend: 30 };
 const BLYLWRD = ['#a50026','#d73027','#f46d43','#fdae61','#fee090','#ffffbf','#e0f3f8','#abd9e9','#74add1','#4575b4','#313695'].reverse();
 
 const TITLE = { size: 36 };
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 .attr('y', TITLE.size + DESCRIPTION.size + 5)
                 .style('font-size', DESCRIPTION.size)
                 .attr('id', 'description')
-                .text(d3.extent(monthlyVariance.map(a => a.year)).join(' - ') + ': base temperature ' + baseTemperature + '℃')
+                .text(d3.extent(monthlyVariance.map(a => a.year)).join(' - ') + ': base temperature ' + baseTemperature + ' ℃')
 
             // year vs month datas
             const [minYear, maxYear] = d3.extent(monthlyVariance.map(a => a.year));
@@ -42,10 +42,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 .domain(Array(maxYear - minYear + 1).fill()
                     .map((_,i) => i + minYear))
                 .range([PADDING.left, GRAPH_W - PADDING.right]);
-
-                console.log(GRAPH_W - PADDING.right)
-                console.log(xScale(1753))
-                console.log(xScale(1754))
 
             // const yScale = d3.scaleTime()
             const yScale = d3.scaleBand()
@@ -76,16 +72,55 @@ document.addEventListener('DOMContentLoaded', () => {
                 .attr('id', 'x-axis');
 
             svg.append('g')
-                .attr('transform', 'translate(' + PADDING.left+ ')')
+                .attr('transform', 'translate(' + PADDING.left + ')')
                 .call(yAxis)
                 .attr('id', 'y-axis');
                 
             const extent = d3.extent(monthlyVariance.map(a => a.variance));
-            console.log(extent)
             const threshold = extent.reduce((a, b) => Math.abs(b) + a, 0) / BLYLWRD.length;
-            console.log(threshold)
+
+            // legend
+            const legendSVG = svg.append('g')
+                .attr('id', 'legend');
+
+            const legendScale = d3.scaleLinear()
+                .domain(extent.map(a => a + baseTemperature))
+                .range([PADDING.left, PADDING.left + 12 * CELL_H]);
+
+            const legendAxis = d3.axisBottom(legendScale)
+                .tickValues(
+                    Array(BLYLWRD.length + 1).fill().map((_,i) => (baseTemperature + extent[0]) + i * threshold)
+                )
+                .tickSize(10)
+                .tickSizeOuter(0)
+                .tickFormat(d3.format('.1f'));
+
+            legendSVG.append('g')
+                .attr('transform', 'translate(0,' + (GRAPH_H - PADDING.legend) + ')')
+                .call(legendAxis);
+
+            legendSVG.selectAll('rect')
+                .data(Array(BLYLWRD.length).fill().map((_,i) => (baseTemperature + extent[0]) + i * threshold))
+                .enter()
+                .append('rect')
+                .attr('class', 'legend-cell')
+                .attr('width', legendScale(baseTemperature + extent[0] + threshold) - PADDING.left)
+                .attr('height', CELL_H)
+                .attr('x', (d, i) => legendScale(d))
+                .attr('y', GRAPH_H - PADDING.legend - CELL_H)
+                .attr('fill', (d, i) => BLYLWRD[i]);
+
+            // tooltip
+            const tooltip = d3.select('body').append('div')
+                .attr('id', 'tooltip')
+                .style('position', 'absolute')
+                .style('opacity', 0)
+            
             // cells
-            svg.selectAll('rect')
+            const map = svg.append('g')
+                .attr('id', 'cell-container');
+
+            map.selectAll('rect')
                 .data(monthlyVariance)
                 .enter()
                 .append('rect')
@@ -99,6 +134,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 .attr('y', d => yScale(d.month - 1))
                 .attr('fill', d => {
                     return BLYLWRD[Math.floor((d.variance + Math.abs(extent[0])) / threshold)] || BLYLWRD[10];
-                });
+                })
+                .on('mouseover', (e, d) => {
+                    const x = e.target.getAttribute('x') - document.getElementById('tooltip').offsetWidth/2 + CELL_W;
+                    const y = e.target.getAttribute('y') - document.getElementById('tooltip').offsetHeight;
+                    tooltip.style('opacity', .8)
+                        .html(d.year + ' - ' + d3.timeFormat('%B')(new Date(2000, d.month - 1)) + '<br>' + Math.round((d.variance + baseTemperature) * 1000)/1000 + ' ℃<br>' + d.variance + ' ℃')
+                        .style('top', y + 'px')
+                        .style('left', x + 'px')
+                        .attr('data-year', d.year);
+                })
+                .on('mouseout', () => {
+                    tooltip.html('')
+                        .style('opacity', 0);
+                })
+
         });
 })

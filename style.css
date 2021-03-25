@@ -1,4 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
+
+body {
+    font-family: 'Lato', sans-serif;
+}
+
 .cell:hover {
     stroke: black;
     stroke-width: 1;
+}
+
+path.domain {
+    stroke-width: 2;
+}
+
+.legend-cell {
+    stroke: black;
+    stroke-width: 1;
+}
+
+#tooltip {
+    text-align: center;
+    padding: 8px;
+    background-color: black;
+    color: white;
+    border-radius: .5rem;
 }
